@@ -144,7 +144,7 @@ class inetOrgPerson extends baseModule implements passwordService, AccountStatus
 		// this is a base module
 		$return["is_base"] = true;
 		// RDN attribute
-		$return["RDN"] = ["cn" => "normal", 'uid' => 'low'];
+		$return["RDN"] = ["cn" => "normal", 'uid' => 'high'];
 		// LDAP filter
 		$return["ldap_filter"] = ['or' => "(objectClass=inetOrgPerson)"];
 		// module dependencies
