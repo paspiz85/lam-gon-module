@@ -1275,13 +1275,20 @@ class inetOrgPerson extends baseModule implements passwordService, AccountStatus
 				$modules = $groupType->getModules();
 				if (in_array('groupOfNames', $modules) || in_array('groupOfMembers', $modules) || in_array('groupOfUniqueNames', $modules)) {
 					$dn = $this->getAccountContainer()->dn_orig;
-					$fieldContainer->addLabel(new htmlOutputText(_('Groups')));
-					$gonFilter = '(|(&(objectClass=groupOfNames)(member=' . ldap_escape($dn, '', LDAP_ESCAPE_FILTER) . '))(&(objectClass=groupOfMembers)(member=' . ldap_escape($dn) . '))(&(objectClass=groupOfUniqueNames)(uniquemember=' . ldap_escape($dn) . ')))';
+					if (empty($groupType->getAlias())) {
+					  $fieldContainer->addLabel(new htmlOutputText(_('Groups')));
+					} else {
+					  $fieldContainer->addLabel(new htmlOutputText($groupType->getAlias()));
+					}
+					$gonFilter = $groupType->getAdditionalLdapFilter();
+					$gonFilter = '(|(&'.$gonFilter.'(member=' . ldap_escape($dn, '', LDAP_ESCAPE_FILTER) . '))(&'.$gonFilter.'(member=' . ldap_escape($dn) . '))(&'.$gonFilter.'(uniquemember=' . ldap_escape($dn) . ')))';
 					$result = searchLDAPByFilter($gonFilter, ['cn'], ['group']);
 					$resultCount = count($result);
 				  $groups = [];
 					for ($i = 0; $i < $resultCount; $i++) {
-						$groups[] = $result[$i]['cn'][0];
+						if (substr($result[$i]['dn'], -strlen($groupType->getSuffix())) === $groupType->getSuffix()) {
+						  $groups[] = $result[$i]['cn'][0];
+						}
 					}
 					if (empty($groups)) {
 						$fieldContainer->addField(new htmlOutputText('-', false));
